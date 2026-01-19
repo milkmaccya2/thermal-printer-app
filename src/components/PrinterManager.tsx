@@ -51,22 +51,34 @@ export const PrinterManager = () => {
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                     <span>🖨️</span> Printer Queue
                 </h2>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
                      <button
                         onClick={handleClearQueue}
                         disabled={actionLoading || jobs.length === 0}
-                        className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-50"
+                        className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-50 transition-colors"
                     >
                         Clear All
                     </button>
                     <button
+                        onClick={async () => {
+                            if(!confirm('Enable printer queue?')) return;
+                            setActionLoading(true);
+                            await actions.enablePrinter();
+                            setActionLoading(false);
+                        }}
+                        disabled={actionLoading}
+                        className="px-3 py-1 text-sm bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
+                    >
+                        Enable
+                    </button>
+                    <button
                         onClick={() => fetchQueue()}
                         disabled={loading}
-                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                         Refresh
                     </button>
@@ -80,16 +92,18 @@ export const PrinterManager = () => {
             ) : (
                 <div className="space-y-2">
                     {jobs.map((job) => (
-                        <div key={job.id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                            <div className="text-sm">
-                                <span className="font-mono font-bold text-blue-800">{job.id}</span>
-                                <span className="mx-2 text-gray-400">|</span>
-                                <span className="text-gray-600 truncate">{job.raw}</span>
+                        <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-blue-50 border border-blue-100 rounded-xl gap-3">
+                            <div className="text-sm w-full min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-mono font-bold text-blue-800 whitespace-nowrap">{job.id}</span>
+                                    <span className="text-gray-400 hidden sm:inline">|</span>
+                                    <span className="text-gray-600 truncate block w-full">{job.raw}</span>
+                                </div>
                             </div>
                             <button
                                 onClick={() => handleCancelJob(job.id)}
                                 disabled={actionLoading}
-                                className="text-xs bg-white border border-red-200 text-red-600 px-2 py-1 rounded hover:bg-red-50"
+                                className="text-xs w-full sm:w-auto bg-white border border-red-200 text-red-600 px-3 py-2 sm:py-1 rounded hover:bg-red-50 text-center transition-colors"
                             >
                                 Cancel
                             </button>

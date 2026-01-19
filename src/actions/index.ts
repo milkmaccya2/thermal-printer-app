@@ -206,6 +206,20 @@ export const server = {
         }
     }
   }),
+
+  enablePrinter: defineAction({
+    accept: 'json',
+    handler: async () => {
+        try {
+            // Re-enable printing (often needed after errors)
+            // cupsenable is standard command to resume paused printers
+            await execAsync('cupsenable $(lpstat -p | cut -d " " -f 2)');
+            return { success: true, message: 'Printers enabled' };
+        } catch (error: any) {
+            return { success: false, message: error.message };
+        }
+    }
+  }),
 };
 
 
