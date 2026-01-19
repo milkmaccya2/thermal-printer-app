@@ -1,0 +1,38 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# We usually commit lock files, but if you want to be strict about 'unnecessary', 
+# standard practice is KEEP lock file. I will keep it.
+# If you want to delete pnpm-lock.yaml from git, add it here.
+# For now, I'll assume standard practice: KEEP pnpm-lock.yaml in git.
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.production
+.env.local
+.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE settings (optional - often better to ignore)
+.vscode/
+.idea/
+
+# Local build logs or temporary files
+build_log.txt
+*.log
+
+# PM2 logs (if any generated in project)
+logs/
