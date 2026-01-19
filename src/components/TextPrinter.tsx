@@ -36,18 +36,43 @@ export const TextPrinter = () => {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
             />
-            <div className="mt-4 flex justify-between items-center">
-                <span className="text-sm text-gray-500 font-medium h-5">{status}</span>
+            <div className="mt-4 flex flex-col gap-4">
+                 <div className="flex justify-between items-start min-h-[24px]">
+                    <p className="text-sm text-gray-600 font-medium break-words pr-2 flex-1 leading-tight">
+                        {status}
+                    </p>
+                    {text && (
+                        <button 
+                            onClick={() => {
+                                setText('');
+                                setStatus('');
+                            }} 
+                            className="text-xs text-red-500 font-bold px-2 py-1 bg-red-50 rounded hover:bg-red-100 whitespace-nowrap ml-2"
+                        >
+                            CLEAR
+                        </button>
+                    )}
+                 </div>
+
                 <button
                     onClick={handlePrint}
                     disabled={loading || !text.trim()}
-                    className={`px-6 py-2 rounded-lg font-bold text-white transition-all active:scale-95 ${
-                        loading || !text.trim() 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                    className={`w-full py-4 rounded-xl font-bold text-lg text-white shadow-lg transition-transform active:scale-[0.98] flex items-center justify-center gap-2 ${
+                        loading || !text.trim()
+                        ? 'bg-gray-300 cursor-not-allowed shadow-none text-gray-500' 
+                        : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-xl'
                     }`}
                 >
-                    {loading ? 'Printing...' : 'Print Text'}
+                    {loading ? (
+                        <>
+                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            Sending...
+                        </>
+                    ) : (
+                        <>
+                            <span>🖨️</span> PRINT TEXT
+                        </>
+                    )}
                 </button>
             </div>
         </div>
