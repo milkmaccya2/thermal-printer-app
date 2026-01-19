@@ -16,12 +16,14 @@ export const server = {
     }),
     handler: async ({ text }) => {
       try {
+        const { default: iconv } = await import('iconv-lite');
         const tmpDir = os.tmpdir();
         const fileName = `print-text-${Date.now()}.bin`; // Changed to .bin
         const filePath = path.join(tmpDir, fileName);
 
-        // Convert text to buffer
-        const textBuffer = Buffer.from(text + '\n', 'utf-8');
+        // Convert text to CP932 (Shift-JIS) buffer for Japanese support
+        // Most thermal printers support Shift-JIS or PC932
+        const textBuffer = iconv.encode(text + '\n', 'Shift_JIS');
         
         // Append Cut Command: Feed 4 lines + GS V 66 0
         const cutBuffer = Buffer.from([
