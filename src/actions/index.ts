@@ -62,12 +62,13 @@ export const server = {
         const buffer = Buffer.from(base64Data, 'base64');
 
         // 1. Process base image: Resize & Custom Dithering
-        const safeWidth = 512;
+        // POS-80 typically supports 576 dots width (72mmprintable area)
+        const safeWidth = 576;
         
         // Get raw grayscale pixel data
         const { data: rawData, info } = await sharp(buffer)
             .flatten({ background: { r: 255, g: 255, b: 255 } }) // Handle transparency
-            .resize({ width: safeWidth, withoutEnlargement: true })
+            .resize({ width: safeWidth }) // Force resize to full width
             .grayscale()
             .raw()
             .toBuffer({ resolveWithObject: true });
