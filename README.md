@@ -19,6 +19,7 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 - **Styling**: [TailwindCSS](https://tailwindcss.com/)
 - **Image Processing**: [Sharp](https://sharp.pixelplumbing.com/)
 - **Backend Interaction**: `actions` (Astro Actions) calling system `lp` commands.
+- **Process Manager**: [PM2](https://pm2.keymetrics.io/) (for production process management)
 
 ## 🏗️ System Architecture
 
