@@ -92,7 +92,7 @@ graph TD
 
 ## ⚠️ Important Notes
 
-- **System Fonts**: For printing non-ASCII characters (like Japanese), ensure the host system has the appropriate fonts installed and configured for the printer.
+- **Printer Firmware**: For printing Japanese text, the thermal printer must support **Shift_JIS (CP932)** encoding and have Japanese fonts (Kanji ROM) installed in its firmware, as text is sent in raw mode.
 - **Permissions**: The Node.js process must have permission to execute `lp` commands.
 
 ## 📄 License
