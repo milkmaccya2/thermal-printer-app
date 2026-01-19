@@ -18,23 +18,33 @@ MacとRaspberry PiではCPUアーキテクチャやOSが異なるため、特に
 
 Raspberry PiにSSH接続し、必要なツールをインストールします。
 
-### 1-1. Node.js のインストール
-最新のLTSバージョン（v20やv22など）を推奨します。
+### 1-1. nvm (Node Version Manager) と Node.js のインストール
+`nvm` を使って Node.js をインストールします。これによりバージョンの切り替えが容易になります。
+
 ```bash
-# NodeSourceからインストールする例 (v20)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+# nvm のインストール (バージョンは適宜最新を確認)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+
+# シェル設定の再読み込み
+source ~/.bashrc
+
+# Node.js LTS版 (v22系など) をインストール
+nvm install --lts
+
+# インストール確認
+node -v
+npm -v
 ```
 
 ### 1-2. pnpm のインストール
 ```bash
-sudo npm install -g pnpm
+# npm経由でpnpmをグローバルインストール
+npm install -g pnpm
 ```
 
-### 1-3. PM2 のインストール（プロセス管理）
-```bash
-sudo npm install -g pm2
-```
+### 1-3. PM2 について
+PM2 はプロジェクトの `devDependencies` に含まれているため、グローバルインストールの必要はありません。
+プロジェクト内の PM2 を使用します。
 
 ### 1-4. CUPS (プリンタドライバ) の設定
 すでに印刷できている場合はスキップしてください。
@@ -71,8 +81,18 @@ pnpm install
 # 本番用ビルド
 pnpm build
 
-# PM2でアプリを再起動
+# ---- 初回起動時のみ ----
+# PM2にアプリを登録して起動
+pnpm exec pm2 start ecosystem.config.cjs
+
+# サーバー再起動時も自動起動するように設定（表示されるコマンドを実行）
+pnpm exec pm2 startup
+pnpm exec pm2 save
+# ----------------------
+
+# ---- 2回目以降の更新 ----
 pnpm exec pm2 restart thermal-printer-app
+# ----------------------
 ```
 
 ---
