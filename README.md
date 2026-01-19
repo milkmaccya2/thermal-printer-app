@@ -26,7 +26,7 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 graph TD
     User["📱 User (Browser)<br/>Mobile / PC"]
     
-    subgraph "Raspberry Pi 4"
+    subgraph "Raspberry Pi"
         Server["Node.js Server<br/>(Astro + React)"]
         CUPS["🖨️ CUPS / lp Command"]
         Queue["Print Queue"]

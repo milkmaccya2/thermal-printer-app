@@ -97,20 +97,27 @@ pnpm exec pm2 restart thermal-printer-app
 
 ---
 
-## 3. デプロイの自動化（オプション）
+## 3. デプロイの自動化（推奨）
 
-毎回SSHでコマンドを打つのが面倒な場合、Macの `package.json` にデプロイ用コマンドを追加しておくと便利です。
-（※Raspberry Piのホスト名が `raspberrypi.local`、ユーザーが `pi`、パスが `~/app` の場合の例）
+`package.json` にデプロイ用のスクリプトが設定されています。
+Macのターミナルから以下のコマンドを実行するだけで、`deploy.sh` が実行され、Git Pull, 依存関係インストール、ビルド、PM2再起動が一括で行われます。
 
-```json
-"scripts": {
-  "deploy": "ssh pi@raspberrypi.local 'cd ~/app && git pull && pnpm install && pnpm build && pnpm exec pm2 restart thermal-printer-app'"
-}
+```bash
+pnpm run deploy
 ```
 
-実行コマンド:
+※ `deploy.sh` は `ssh` コマンドを使用します。必要に応じてファイルを編集し、Raspberry Piのホスト名やパスを環境に合わせてください。
+
+### `deploy.sh` の内容例:
 ```bash
-npm run deploy
+#!/bin/bash
+HOST="raspberrypi.local"      # あなたのRaspberry Piのホスト名
+USER="pi"                     # SSHユーザー名
+DIR="~/path/to/project"       # プロジェクトのディレクトリパス
+
+echo "🚀 Starting deployment..."
+ssh $USER@$HOST "cd $DIR && git pull && pnpm install && pnpm build && pnpm exec pm2 restart thermal-printer-app"
+echo "✅ Deployment complete!"
 ```
 
 ## 注意事項: `sharp` について
