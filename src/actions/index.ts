@@ -64,6 +64,7 @@ export const server = {
         
         // Get raw grayscale pixel data
         const { data: rawData, info } = await sharp(buffer)
+            .flatten({ background: { r: 255, g: 255, b: 255 } }) // Handle transparency
             .resize({ width: safeWidth, withoutEnlargement: true })
             .grayscale()
             .raw()
@@ -125,12 +126,11 @@ export const server = {
             }
         }
 
-        // Add Feed and Cut commands for convenience in RAW mode
+        // Add Feed and Cut commands
         // Feed 4 lines (0x0A * 4)
-        // Partial Cut Command: GS V 66 0 (0x1d 0x56 0x42 0x00)
+        // Removed partial cut command to prevent double cutting if printer auto-cuts
         const footer = Buffer.from([
-            0x0A, 0x0A, 0x0A, 0x0A, 
-            0x1d, 0x56, 0x42, 0x00 
+            0x0A, 0x0A, 0x0A, 0x0A 
         ]);
         
         const finalBuffer = Buffer.concat([header, rasterBuffer, footer]);
