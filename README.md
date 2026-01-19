@@ -20,6 +20,26 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 - **Image Processing**: [Sharp](https://sharp.pixelplumbing.com/)
 - **Backend Interaction**: `actions` (Astro Actions) calling system `lp` commands.
 
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    User["📱 User (Browser)<br/>Mobile / PC"]
+    
+    subgraph "Raspberry Pi 4"
+        Server["Node.js Server<br/>(Astro + React)"]
+        CUPS["🖨️ CUPS / lp Command"]
+        Queue["Print Queue"]
+    end
+    
+    Printer["🧾 Thermal Printer<br/>(POS-80)"]
+
+    User --"HTTP/WiFi<br/>Actions (JSON)"--> Server
+    Server --"Execute"--> CUPS
+    CUPS --> Queue
+    Queue --"USB"--> Printer
+```
+ 
 ## 🚀 Getting Started
 
 ### Prerequisites
