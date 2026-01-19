@@ -3,7 +3,12 @@ import { actions } from 'astro:actions';
 
 export const ImagePrinter = () => {
     const [original, setOriginal] = useState<string | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
+    const [status, setStatus] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [processing, setProcessing] = useState(false);
     const [viewMode, setViewMode] = useState<'original' | 'preview'>('preview');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
