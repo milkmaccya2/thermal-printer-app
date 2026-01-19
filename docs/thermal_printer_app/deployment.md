@@ -117,3 +117,19 @@ npm run deploy
 このプロジェクトでは画像処理に `sharp` を使用しています。`sharp` はインストールされた環境（OS/CPU）に合わせてバイナリをダウンロードします。
 「Macでビルドした `node_modules` をそのままコピー」すると、Raspberry Piでは**確実に動作しません**。
 必ずRaspberry Pi上で `pnpm install` を実行してください。
+
+## 4. トラブルシューティング
+
+### 印刷エラー: "Error - No default destination"
+**原因:** デフォルトのプリンターがシステムで設定されていません。
+
+**解決策:**
+1. 現在のプリンター名を確認します。
+   ```bash
+   lpstat -p
+   # 出力例: printer POS-80 is idle...
+   ```
+2. 確認したプリンター名（例: `POS-80`）をデフォルトに設定します。
+   ```bash
+   lpoptions -d POS-80
+   ```
