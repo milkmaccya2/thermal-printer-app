@@ -57,6 +57,8 @@ export const server = {
     handler: async ({ image }) => {
       try {
         const { default: sharp } = await import('sharp');
+        const { applyFloydSteinberg, createEscPosRaster } = await import('../utils/printer');
+        
         // Remove header data:image/png;base64,
         const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
         const buffer = Buffer.from(base64Data, 'base64');
@@ -73,70 +75,21 @@ export const server = {
             .raw()
             .toBuffer({ resolveWithObject: true });
 
-        const width = info.width;
-        const height = info.height;
-        
-        // Use Int16Array to prevent overflow/wrapping during error distribution
-        const pixels = new Int16Array(rawData);
+        const { width, height } = info;
 
-        // Floyd-Steinberg Dithering Algorithm
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const idx = y * width + x;
-                const oldVal = pixels[idx];
-                
-                // Threshold pixel (0 or 255)
-                const newVal = oldVal < 128 ? 0 : 255;
-                pixels[idx] = newVal;
-                
-                const error = oldVal - newVal;
-                
-                // Distribute error to neighbors
-                if (x + 1 < width) pixels[idx + 1] += (error * 7) >> 4;
-                if (y + 1 < height && x - 1 >= 0) pixels[idx + width - 1] += (error * 3) >> 4;
-                if (y + 1 < height) pixels[idx + width] += (error * 5) >> 4;
-                if (y + 1 < height && x + 1 < width) pixels[idx + width + 1] += (error * 1) >> 4;
-            }
-        }
+        // 2. Apply Custom Dithering
+        const ditheredPixels = applyFloydSteinberg(rawData, width, height);
         
-        // 2. Convert to ESC/POS Raster Format (GS v 0)
-        // Command: GS v 0 m xL xH yL yH d1...dk
-        // m=0 (Normal)
-        // xL, xH = width in bytes (little endian)
-        // yL, yH = height in dots (little endian)
-        
-        const widthBytes = Math.ceil(width / 8);
-        const header = Buffer.from([
-            0x1d, 0x76, 0x30, 0x00, 
-            widthBytes & 0xff, (widthBytes >> 8) & 0xff,
-            height & 0xff, (height >> 8) & 0xff
-        ]);
-        
-        // Pack pixels into bytes
-        const rasterBuffer = Buffer.alloc(widthBytes * height);
-        rasterBuffer.fill(0);
-        
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                // If pixel is BLACK (0), set the bit to 1. 
-                // In thermal printing, 1 usually means "burn" (black).
-                // Our pixels array has 0 for black, 255 for white after thresholding.
-                if (pixels[y * width + x] === 0) {
-                    const byteIndex = y * widthBytes + Math.floor(x / 8);
-                    const bitIndex = 7 - (x % 8);
-                    rasterBuffer[byteIndex] |= (1 << bitIndex);
-                }
-            }
-        }
+        // 3. Convert to ESC/POS Raster Format
+        const rasterData = createEscPosRaster(ditheredPixels, width, height);
 
         // Add Feed and Cut commands
         // Feed 4 lines (0x0A * 4)
-        // Removed partial cut command to prevent double cutting if printer auto-cuts
         const footer = Buffer.from([
             0x0A, 0x0A, 0x0A, 0x0A 
         ]);
         
-        const finalBuffer = Buffer.concat([header, rasterBuffer, footer]);
+        const finalBuffer = Buffer.concat([rasterData, footer]);
 
         const tmpDir = os.tmpdir();
         const fileName = `print-image-${Date.now()}.bin`;
