@@ -1,3 +1,5 @@
+import { ditherGrayscale } from './ditheringCore';
+
 /**
  * Applies Floyd-Steinberg dithering to a grayscale image.
  * Uses Int16Array to handle error propagation without clamping too early.
@@ -8,37 +10,7 @@
  * @returns Dithered 1-bit pixel array (0=black, 255=white)
  */
 export function applyFloydSteinberg(input: Buffer, width: number, height: number): Uint8Array {
-    // Copy input to Int16Array to prevent overflow/wrapping during error distribution
-    // 0-255 range, but error propagation can make values go outside temporarily
-    const pixels = new Int16Array(input);
-    const output = new Uint8Array(width * height);
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const idx = y * width + x;
-            const oldVal = pixels[idx];
-            
-            // Threshold pixel (0 or 255)
-            // Pure black < 128 < Pure white
-            const newVal = oldVal < 128 ? 0 : 255;
-            
-            // In our logic for thermal printer: 
-            // We want 1-bit output where 0 and 255 are kept as is for now.
-            // We'll map them to bits later (0 -> 1(print), 255 -> 0(empty))
-            pixels[idx] = newVal;
-            output[idx] = newVal;
-            
-            const error = oldVal - newVal;
-            
-            // Distribute error to neighbors
-            // (7, 3, 5, 1) / 16
-            if (x + 1 < width) pixels[idx + 1] += (error * 7) >> 4;
-            if (y + 1 < height && x - 1 >= 0) pixels[idx + width - 1] += (error * 3) >> 4;
-            if (y + 1 < height) pixels[idx + width] += (error * 5) >> 4;
-            if (y + 1 < height && x + 1 < width) pixels[idx + width + 1] += (error * 1) >> 4;
-        }
-    }
-    return output;
+    return ditherGrayscale(new Uint8Array(input), width, height);
 }
 
 /**
