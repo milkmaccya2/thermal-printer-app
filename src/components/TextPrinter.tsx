@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { actions } from 'astro:actions';
+import { Type, Printer, Loader2 } from 'lucide-react';
 
 export const TextPrinter = () => {
     const [text, setText] = useState('');
@@ -28,7 +29,8 @@ export const TextPrinter = () => {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-                <span>📝</span> Text Printer
+                <Type className="w-6 h-6 text-indigo-600" />
+                Text Printer
             </h2>
             <textarea
                 className="w-full h-40 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none font-mono text-sm"
@@ -65,12 +67,13 @@ export const TextPrinter = () => {
                 >
                     {loading ? (
                         <>
-                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            <Loader2 className="w-5 h-5 animate-spin" />
                             Sending...
                         </>
                     ) : (
                         <>
-                            <span>🖨️</span> PRINT TEXT
+                            <Printer className="w-6 h-6" />
+                            PRINT TEXT
                         </>
                     )}
                 </button>

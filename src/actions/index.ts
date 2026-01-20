@@ -1,5 +1,5 @@
 import { defineAction } from 'astro:actions';
-import { z } from 'astro:schema';
+import { z } from 'astro/zod';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
@@ -113,23 +113,33 @@ export const server = {
   }),
 
   // Queue Management Actions
-  getQueue: defineAction({
+  getPrinterStatus: defineAction({
     accept: 'json',
     handler: async () => {
       try {
-        const { stdout } = await execAsync('lpstat -o');
-        const jobs = stdout.split('\n')
+        // Get Printer Status
+        const { stdout: statusOut } = await execAsync('lpstat -p');
+        const status = statusOut.split('\n')[0] || 'Unknown'; // Take first line e.g. "printer POS-80 is idle..."
+
+        // Get Queue
+        const { stdout: queueOut } = await execAsync('lpstat -o');
+        const jobs = queueOut.split('\n')
             .filter(line => line.trim().length > 0)
             .map(line => {
                 const parts = line.split(/\s+/);
+                // lpstat -o output format varies but typically:
+                // POS-80-55 milkmaccya 1024 Tue 18 ...
                 return {
                     id: parts[0],
+                    name: parts[0], // job id as name for now
+                    file: 'Raw Data',
+                    size: 'Unknown',
+                    time: parts.slice(3).join(' ') || 'Just now',
                     user: parts[1],
-                    status: 'Pending', 
-                    raw: line
                 };
             });
-        return { success: true, jobs };
+            
+        return { success: true, jobs, status };
       } catch (error: any) {
         return { success: false, message: error.message };
       }

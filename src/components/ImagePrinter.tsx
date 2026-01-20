@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { actions } from 'astro:actions';
+import { Image, Upload, Printer, Loader2 } from 'lucide-react';
 
 export const ImagePrinter = () => {
     const [original, setOriginal] = useState<string | null>(null);
@@ -11,27 +12,21 @@ export const ImagePrinter = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        // ... (existing code, ensure it aligns with file context)
         const file = e.target.files?.[0];
         if (file) {
-            // Show loading state
             setProcessing(true);
             setStatus('Generating preview...');
             setViewMode('preview');
-            
             try {
-                // 1. Read original for sending to server
                 const reader = new FileReader();
-                reader.onloadend = () => {
-                   setOriginal(reader.result as string);
-                };
+                reader.onloadend = () => { setOriginal(reader.result as string); };
                 reader.readAsDataURL(file);
 
-                // 2. Generate Dithered Preview
                 const { processImagePreview } = await import('../utils/ditheringClient');
                 const ditheredDataUrl = await processImagePreview(file);
                 setPreview(ditheredDataUrl);
                 setStatus('Preview ready.');
-                
             } catch (err) {
                 console.error(err);
                 setStatus('Failed to generate preview');
@@ -42,7 +37,6 @@ export const ImagePrinter = () => {
     };
 
     const handlePrint = async () => {
-        // Send ORIGINAL to server to let sharp handle the high-quality processing
         if (!original) return;
         setLoading(true);
         setStatus('Sending...');
@@ -63,7 +57,8 @@ export const ImagePrinter = () => {
     return (
         <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200">
             <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-                <span>🖼️</span> Image Printer
+                <Image className="w-6 h-6 text-indigo-600" />
+                Image Printer
             </h2>
             
             {/* Image Display Area */}
@@ -109,10 +104,13 @@ export const ImagePrinter = () => {
                         onClick={() => !processing && fileInputRef.current?.click()}
                     >
                          {processing ? (
-                            <div className="text-gray-500 animate-pulse font-medium">Processing...</div>
+                            <div className="text-gray-500 font-medium flex flex-col items-center gap-2">
+                                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                                Processing...
+                            </div>
                          ) : (
                             <>
-                                <p className="text-gray-400 text-4xl mb-2">📁</p>
+                                <Upload className="w-12 h-12 text-gray-300 mb-2" />
                                 <p className="text-gray-500 font-medium">Tap to upload image</p>
                                 <p className="text-xs text-gray-400 mt-1">PNG, JPG supported</p>
                             </>
@@ -163,12 +161,13 @@ export const ImagePrinter = () => {
                 >
                     {loading ? (
                         <>
-                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            <Loader2 className="w-5 h-5 animate-spin" />
                             Sending...
                         </>
                     ) : (
                         <>
-                            <span>🖨️</span> PRINT IMAGE
+                            <Printer className="w-6 h-6" />
+                            PRINT IMAGE
                         </>
                     )}
                 </button>

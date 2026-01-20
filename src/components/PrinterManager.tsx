@@ -1,120 +1,134 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { actions } from 'astro:actions';
+import { Printer, CheckCircle, AlertCircle, List, FileText, RefreshCcw } from 'lucide-react';
 
-interface Job {
+interface PrintJob {
     id: string;
-    user: string;
-    status: string;
-    raw: string;
+    name: string;
+    file: string;
+    size: string;
+    time: string;
 }
 
 export const PrinterManager = () => {
-    const [jobs, setJobs] = useState<Job[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [actionLoading, setActionLoading] = useState(false);
+    const [jobs, setJobs] = useState<PrintJob[]>([]);
+    const [status, setStatus] = useState<string>('Checking...');
+    const [isPaused, setIsPaused] = useState<boolean>(false);
+    const [enabling, setEnabling] = useState(false);
 
-    const fetchQueue = useCallback(async () => {
-        setLoading(true);
+    const fetchStatus = async () => {
         try {
-            const { data } = await actions.getQueue();
-            if (data?.success) {
-                setJobs(data.jobs || []);
+            const result = await actions.getPrinterStatus({});
+            if (result.data) {
+                setJobs(result.data.jobs || []);
+                const currentStatus = result.data.status || 'Unknown';
+                setStatus(currentStatus);
+                // Simple heuristic: if status contains "paused", show enable button
+                setIsPaused(currentStatus.toLowerCase().includes('paused'));
             }
         } catch (e) {
-            console.error('Failed to fetch queue', e);
-        } finally {
-            setLoading(false);
+            console.error("Failed to fetch status", e);
+            setStatus('Error fetching status');
         }
-    }, []);
+    };
+
+    const handleEnablePrinter = async () => {
+        setEnabling(true);
+        try {
+            await actions.enablePrinter({});
+            // Wait a bit before refreshing
+            setTimeout(fetchStatus, 2000);
+        } catch (error) {
+            console.error("Failed to enable printer", error);
+        } finally {
+            setEnabling(false);
+        }
+    };
 
     useEffect(() => {
-        fetchQueue();
-        const interval = setInterval(fetchQueue, 5000); // Poll every 5 seconds
+        fetchStatus();
+        const interval = setInterval(fetchStatus, 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
-    }, [fetchQueue]);
+    }, []);
 
-    const handleCancelJob = async (jobId: string) => {
-        if (!confirm(`Cancel job ${jobId}?`)) return;
-        setActionLoading(true);
-        await actions.cancelJob({ jobId });
-        fetchQueue();
-        setActionLoading(false);
-    };
-
-    const handleClearQueue = async () => {
-        if (!confirm('Cancel ALL jobs? This will stop everything.')) return;
-        setActionLoading(true);
-        await actions.clearQueue();
-        fetchQueue();
-        setActionLoading(false);
-    };
+    const isOnline = status.includes('idle') || status.includes('printing');
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                    <span>🖨️</span> Printer Queue
-                </h2>
-                <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
-                     <button
-                        onClick={handleClearQueue}
-                        disabled={actionLoading || jobs.length === 0}
-                        className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-50 transition-colors"
-                    >
-                        Clear All
-                    </button>
-                    <button
-                        onClick={async () => {
-                            if(!confirm('Enable printer queue?')) return;
-                            setActionLoading(true);
-                            await actions.enablePrinter();
-                            setActionLoading(false);
-                        }}
-                        disabled={actionLoading}
-                        className="px-3 py-1 text-sm bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-                    >
-                        Enable
-                    </button>
-                    <button
-                        onClick={() => fetchQueue()}
-                        disabled={loading}
-                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                        Refresh
-                    </button>
+        <div className="space-y-6">
+            {/* Status Card */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <Printer className="w-6 h-6 text-indigo-600" />
+                        Printer Status
+                    </h2>
+                    {isPaused && (
+                         <button
+                            onClick={handleEnablePrinter}
+                            disabled={enabling}
+                            className={`flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full transition-colors ${
+                                enabling 
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                            }`}
+                        >
+                            <RefreshCcw className={`w-4 h-4 ${enabling ? 'animate-spin' : ''}`} />
+                            {enabling ? 'Enabling...' : 'Enable Printer'}
+                        </button>
+                    )}
+                </div>
+                
+                <div className={`flex items-center gap-3 p-4 rounded-xl ${isOnline ? 'bg-green-50 border border-green-100' : 'bg-amber-50 border border-amber-100'}`}>
+                    <div className={`text-2xl ${isOnline ? 'text-green-500' : 'text-amber-500'}`}>
+                        {isOnline ? <CheckCircle className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+                    </div>
+                    <div>
+                        <p className={`font-bold ${isOnline ? 'text-green-800' : 'text-amber-800'}`}>
+                            {isOnline ? 'Online / Ready' : 'Status Check'}
+                        </p>
+                        <p className={`text-sm ${isOnline ? 'text-green-600' : 'text-amber-600'}`}>{status}</p>
+                    </div>
                 </div>
             </div>
 
-            {jobs.length === 0 ? (
-                <div className="text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    No active jobs. Ready to print.
+            {/* Print Queue */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <List className="w-5 h-5 text-gray-500" />
+                        Print Queue
+                    </h2>
+                    <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">
+                        {jobs.length} jobs
+                    </span>
                 </div>
-            ) : (
-                <div className="space-y-2">
-                    {jobs.map((job) => (
-                        <div key={job.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-blue-50 border border-blue-100 rounded-xl gap-3">
-                            <div className="text-sm w-full min-w-0">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-mono font-bold text-blue-800 whitespace-nowrap">{job.id}</span>
-                                    <span className="text-gray-400 hidden sm:inline">|</span>
-                                    <span className="text-gray-600 truncate block w-full">{job.raw}</span>
+
+                {jobs.length === 0 ? (
+                    <div className="text-center py-12 text-gray-400 bg-gray-50 rounded-xl border-dashed border-2 border-gray-200">
+                        <Printer className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p>No active print jobs</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {jobs.map((job) => (
+                            <div key={job.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 transition-all hover:bg-gray-100">
+                                <div className="flex items-center gap-3 mb-2 sm:mb-0 w-full sm:w-auto overflow-hidden">
+                                    <div className="bg-white p-2 rounded-lg border border-gray-200 shrink-0">
+                                        <FileText className="w-4 h-4 text-gray-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-bold text-gray-800 truncate">{job.id}</p>
+                                        <p className="text-xs text-gray-500 truncate max-w-[200px]">{job.name}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 text-sm text-gray-500 pl-12 sm:pl-0 shrink-0 whitespace-nowrap">
+                                    <span>{job.size}</span>
+                                    <span>{job.time}</span>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => handleCancelJob(job.id)}
-                                disabled={actionLoading}
-                                className="text-xs w-full sm:w-auto bg-white border border-red-200 text-red-600 px-3 py-2 sm:py-1 rounded hover:bg-red-50 text-center transition-colors"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-            
-            <div className="mt-4 text-xs text-gray-400 flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400' : 'bg-green-400'}`}></span>
-                {loading ? 'Refreshing...' : `Auto-updates every 5s. Total Jobs: ${jobs.length}`}
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
