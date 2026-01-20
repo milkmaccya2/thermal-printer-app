@@ -36,3 +36,6 @@ build_log.txt
 
 # PM2 logs (if any generated in project)
 logs/
+
+# Local scripts
+deploy.sh
