@@ -46,20 +46,19 @@ export const PrinterStatusCard = ({ status, isPaused, onStatusUpdate }: PrinterS
                     Printer Status
                 </h2>
                 <div className="flex gap-2">
-                    {isPaused && (
-                        <button
-                            onClick={handleEnablePrinter}
-                            disabled={enabling}
-                            className={`flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full transition-colors ${
-                                enabling 
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                            }`}
-                        >
-                            <RefreshCcw className={`w-4 h-4 ${enabling ? 'animate-spin' : ''}`} />
-                            {enabling ? 'Enabling...' : 'Enable'}
-                        </button>
-                    )}
+                    <button
+                        onClick={handleEnablePrinter}
+                        disabled={enabling}
+                        className={`flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full transition-colors ${
+                            enabling 
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                            : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                        }`}
+                        title="Enable Printer"
+                    >
+                        <RefreshCcw className={`w-4 h-4 ${enabling ? 'animate-spin' : ''}`} />
+                        {enabling ? 'Enabling...' : 'Enable'}
+                    </button>
                     <button
                         onClick={handleForceCut}
                         disabled={cutting}

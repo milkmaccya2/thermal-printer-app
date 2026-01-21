@@ -1,33 +1,28 @@
-# 実装計画 - Printer Buffer Handling & Force Cut
+# 実装計画 - Restore Printer Control Buttons
 
 ## 目標
-1. **バッファ溢れ対策 (Chunked Printing)**: 画像データを小さなチャンクに分割し、ウェイトを挟んで送信することで、プリンターのバッファ溢れを防ぐ。
-2. **強制カット機能 (Force Cut)**: 印刷トラブル時に手動で用紙カットを行えるようにする。
+ユーザーのリクエストに基づき、以下の機能をUIに追加・復元する。
+1. **Enable Printer**: `cupsenable` コマンドを実行するボタンを常時（またはアクセスしやすく）表示する。
+2. **Clear Queue**: 全てのジョブをキャンセルするボタンを追加。
+3. **Cancel Job**: 個別のジョブをキャンセルするボタンを追加。
 
 ## 変更案
 
-### 1. サーバーサイド (`src/actions/index.ts`)
-- **[NEW] `forceCut` アクション**:
-    - 単純にフィードとカットコマンドのみを `lp` に送信するアクションを追加。
-- **[MODIFY] `printImage` アクション**:
-    - **Chunking処理**: 生成された画像データを、一定の高さ（例: 256ライン）ごとに分割する。
-    - **Sequential Global Lock**: 一連の分割印刷中に他のジョブが割り込まないよう、簡易的なロック機構を導入する。
-    - **Throttle**: 各チャンクの送信（`lp` 実行）間に適切なウェイト（例: 300ms〜500ms）を設ける。
+### 1. `src/components/PrinterStatusCard.tsx`
+- **[MODIFY] Enable Button**: 現在 `isPaused` の時のみ表示されているが、常時表示するか、あるいは「Maintenance」セクションとして強制カットボタンと一緒に配置する。ユーザーが「enablePrinterのボタンもあった」と言っているため、明示的に使えるようにする。
 
-### 2. UIコンポーネント
-- **[MODIFY] `src/components/PrinterStatusCard.tsx`**:
-    - 既存のステータス表示に加え、「✂️ Cut Paper」ボタンを追加する。
-    - クリック時に `forceCut` アクションを呼び出す。
+### 2. `src/components/PrintQueueCard.tsx`
+- **[MODIFY] Clear Queue Button**: キューリストのヘッダー部分に「Clear All」ボタンを追加。
+- **[MODIFY] Cancel Job Button**: 各ジョブの行に「Cancel」（ゴミ箱アイコン等）を追加。
+- **[NEW] Props**: `onClearQueue`, `onCancelJob` コールバックを受け取るように変更。
 
-### 3. Utils (`src/utils/printer.ts`)
-- **[MODIFY] `createEscPosRaster`**:
-    - 分割して呼び出せるように、特段の変更は不要だが、チャンク分割ロジックを確認。
-    - 現状の関数は1つのBufferを返すので、呼び出し元（Action）で画像をスライスしてから渡すのが効率的。
+### 3. `src/components/PrinterManager.tsx`
+- **[MODIFY] Handlers**:
+    - `handleClearQueue`: `actions.clearQueue` を呼び出し、ステータスを更新。
+    - `handleCancelJob`: `actions.cancelJob` を呼び出し、ステータスを更新。
+    - これらを `PrintQueueCard` に渡す。
 
 ## 検証計画
-### 動作確認
-- **強制カット**: ボタンを押して、用紙がフィードされカットされることを確認。
-- **長尺画像印刷**: 長い画像（Webサイトのスクショなど）を印刷し、
-    - 途中で止まらずに最後まで印刷されるか。
-    - 最後にカットされるか。
-    - 印刷品質（つなぎ目）に問題がないか。
+- `npm run build` でビルド確認。
+- （実機デプロイ後）ジョブを投入し、個別にキャンセルできるか確認。
+- （実機デプロイ後）「Enable」ボタンを押してエラーなく動作するか確認。

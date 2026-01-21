@@ -31,6 +31,26 @@ export const PrinterManager = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const handleClearQueue = async () => {
+        if (!confirm('Are you sure you want to clear all jobs?')) return;
+        try {
+            await actions.clearQueue({});
+            fetchStatus();
+        } catch (e) {
+            console.error("Failed to clear queue", e);
+        }
+    };
+
+    const handleCancelJob = async (jobId: string) => {
+        if (!confirm(`Cancel job ${jobId}?`)) return;
+        try {
+            await actions.cancelJob({ jobId });
+            fetchStatus();
+        } catch (e) {
+            console.error("Failed to cancel job", e);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <PrinterStatusCard 
@@ -38,7 +58,11 @@ export const PrinterManager = () => {
                 isPaused={isPaused} 
                 onStatusUpdate={fetchStatus} 
             />
-            <PrintQueueCard jobs={jobs} />
+            <PrintQueueCard 
+                jobs={jobs} 
+                onClearQueue={handleClearQueue}
+                onCancelJob={handleCancelJob}
+            />
         </div>
     );
 };

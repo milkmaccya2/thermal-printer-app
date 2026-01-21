@@ -17,6 +17,10 @@
 - [x] Implement Force Cut Feature <!-- id: 30 -->
     - [x] Add `forceCut` action to `src/actions/index.ts`
     - [x] Update `PrinterStatusCard.tsx` with cut button
-- [x] Implement Chunked Printing <!-- id: 31 -->
-    - [x] Refactor `printImage` in `src/actions/index.ts` to support locking and chunking
-    - [x] Verify chunked printing
+- [x] Implement Chunked Printing [REVERTED] <!-- id: 31 -->
+    - [x] Refactor `printImage` in `src/actions/index.ts` to support locking and chunking [REVERTED]
+    - [x] Verify chunked printing [REVERTED]
+- [x] Restore Printer Control Buttons <!-- id: 32 -->
+    - [x] Update `PrinterStatusCard.tsx` (Enable Button always visible)
+    - [x] Update `PrintQueueCard.tsx` (Clear Queue & Cancel Job buttons)
+    - [x] Update `PrinterManager.tsx` (Wire up actions)

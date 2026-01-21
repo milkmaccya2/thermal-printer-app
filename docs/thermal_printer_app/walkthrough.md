@@ -13,6 +13,8 @@ UIコンポーネントの大規模リファクタリングと、バッファ溢
 
 ### 2. PrinterManagerのリファクタリング
 `PrinterManager` が巨大になっていたため、機能ごとに分割しました。
+- [MODIFY] `printImage` アクション:
+    - **Chunking処理**: 廃止（速度低下のため）。一括送信に戻す。まとめるコンテナとしての役割に特化。
 - **`PrinterStatusCard.tsx`**: ステータス表示と「Enable Printer」ボタン。
 - **`PrintQueueCard.tsx`**: 印刷キューのリスト表示。
 - **`PrinterManager.tsx`**: 上記2つをまとめるコンテナとしての役割に特化。
@@ -32,9 +34,12 @@ UIコンポーネントの大規模リファクタリングと、バッファ溢
     - サーバーサイド: `forceCut` アクションを追加。
     - クライアントサイド: `PrinterStatusCard` に「Cut Paper」ボタンを追加し、緊急時に手動でカットできるようにしました。
 - **分割印刷 (Chunked Printing)**:
-    - 画像印刷(`printImage`)を、一括送信から分割送信(Chunked)に変更。
-    - 200ラインごとに分割し、各チャンク間に500msのウェイトを挟むことで、プリンターの受信バッファ溢れを防止しました。
-    - 印刷処理中の競合を防ぐための簡易ロック機構を導入しました。
+    - [REVERTED] 速度低下が著しいため、分割送信は廃止し一括送信に戻しました。バッファ問題発生時は `Force Cut` で対応します。
+
+### 7. プリンター制御ボタンの復元
+- **Enable Printer**: `PrinterStatusCard` 内で常時表示されるように変更しました。
+- **Clear Queue**: `PrintQueueCard` に「Clear All」ボタンを追加しました。
+- **Cancel Job**: `PrintQueueCard` の各ジョブリストにキャンセルボタンを追加しました。
 
 ## 検証結果
 `npm run build` により、ビルドが正常に完了することを確認しました。
