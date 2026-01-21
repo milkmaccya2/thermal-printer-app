@@ -8,6 +8,11 @@ import os from 'node:os';
 
 const execAsync = promisify(exec);
 
+// Global lock to prevent interleaved printing
+let isPrinting = false;
+
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const server = {
   printText: defineAction({
     accept: 'json',
@@ -49,12 +54,19 @@ export const server = {
     },
   }),
 
+  // ... (previous code)
+
   printImage: defineAction({
     accept: 'json',
     input: z.object({
       image: z.string(), // Base64 data string: "data:image/png;base64,..."
     }),
     handler: async ({ image }) => {
+      if (isPrinting) {
+          return { success: false, message: 'Printer is busy. Please wait.' };
+      }
+      isPrinting = true;
+      
       try {
         const { default: sharp } = await import('sharp');
         const { applyFloydSteinberg, createEscPosRaster } = await import('../utils/printer');
@@ -79,35 +91,52 @@ export const server = {
 
         // 2. Apply Custom Dithering
         const ditheredPixels = applyFloydSteinberg(rawData, width, height);
-        
-        // 3. Convert to ESC/POS Raster Format
-        const rasterData = createEscPosRaster(ditheredPixels, width, height);
 
-        // Add Feed and Cut commands
-        // Feed 4 lines (0x0A * 4)
+        // 3. Chunked Printing Logic
+        const CHUNK_HEIGHT = 200; // Lines per chunk (adjust based on buffer size)
+        const DELAY_MS = 500;     // Wait between chunks
+        
+        console.log(`Starting print: ${width}x${height}, ${(height/CHUNK_HEIGHT).toFixed(1)} chunks`);
+
+        for (let y = 0; y < height; y += CHUNK_HEIGHT) {
+            const currentHeight = Math.min(CHUNK_HEIGHT, height - y);
+            
+            // Extract chunk pixels
+            // ditheredPixels is a 1D array: [y0x0, y0x1, ... y1x0...]
+            const startIdx = y * width;
+            const endIdx = (y + currentHeight) * width;
+            const chunkPixels = ditheredPixels.slice(startIdx, endIdx);
+            
+            // Convert chunk to Raster
+            const rasterData = createEscPosRaster(chunkPixels, width, currentHeight);
+            
+            const tmpDir = os.tmpdir();
+            const fileName = `chunk-${Date.now()}-${y}.bin`;
+            const filePath = path.join(tmpDir, fileName);
+            
+            await fs.writeFile(filePath, rasterData);
+            await execAsync(`lp -o raw "${filePath}"`);
+            
+            // Wait for buffer to drain partially
+            await wait(DELAY_MS);
+        }
+
+        // Add Feed and Cut commands (Separate final chunk)
         const footer = Buffer.from([
-            0x0A, 0x0A, 0x0A, 0x0A 
+            0x0A, 0x0A, 0x0A, 0x0A, // Feed 4 lines
+            0x1d, 0x56, 0x42, 0x00  // Cut
         ]);
         
-        const finalBuffer = Buffer.concat([rasterData, footer]);
+        const footerPath = path.join(os.tmpdir(), `footer-${Date.now()}.bin`);
+        await fs.writeFile(footerPath, footer);
+        await execAsync(`lp -o raw "${footerPath}"`);
 
-        const tmpDir = os.tmpdir();
-        const fileName = `print-image-${Date.now()}.bin`;
-        const filePath = path.join(tmpDir, fileName);
-
-        await fs.writeFile(filePath, finalBuffer);
-        console.log(`ESC/POS Binary file saved to ${filePath}`);
-
-        // Send raw binary
-        const { stdout, stderr } = await execAsync(`lp -o raw "${filePath}"`);
-        
-        console.log('lp output:', stdout);
-        if (stderr) console.error('lp stderr:', stderr);
-
-        return { success: true, message: 'Image sent to printer (RAW)' };
+        return { success: true, message: 'Image sent to printer (Chunked)' };
       } catch (error: any) {
         console.error('Image Print error:', error);
         return { success: false, message: error.message };
+      } finally {
+        isPrinting = false;
       }
     },
   }),
@@ -179,6 +208,30 @@ export const server = {
             // cupsenable is standard command to resume paused printers
             await execAsync('cupsenable $(lpstat -p | cut -d " " -f 2)');
             return { success: true, message: 'Printers enabled' };
+        } catch (error: any) {
+            return { success: false, message: error.message };
+        }
+    }
+  }),
+
+  forceCut: defineAction({
+    accept: 'json',
+    handler: async () => {
+        try {
+            // Cut Command: Feed 4 lines + GS V 66 0
+            const cutBuffer = Buffer.from([
+                0x0A, 0x0A, 0x0A, 0x0A, 
+                0x1d, 0x56, 0x42, 0x00 
+            ]);
+            
+            const tmpDir = os.tmpdir();
+            const fileName = `force-cut-${Date.now()}.bin`;
+            const filePath = path.join(tmpDir, fileName);
+
+            await fs.writeFile(filePath, cutBuffer);
+            await execAsync(`lp -o raw "${filePath}"`);
+            
+            return { success: true, message: 'Cut command sent' };
         } catch (error: any) {
             return { success: false, message: error.message };
         }

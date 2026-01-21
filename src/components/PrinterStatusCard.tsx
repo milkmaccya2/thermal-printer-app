@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { actions } from 'astro:actions';
-import { Printer, CheckCircle, AlertCircle, RefreshCcw } from 'lucide-react';
+import { Printer, CheckCircle, AlertCircle, RefreshCcw, Scissors } from 'lucide-react';
 import { Card } from './ui/Card';
 
 interface PrinterStatusCardProps {
@@ -11,6 +11,7 @@ interface PrinterStatusCardProps {
 
 export const PrinterStatusCard = ({ status, isPaused, onStatusUpdate }: PrinterStatusCardProps) => {
     const [enabling, setEnabling] = useState(false);
+    const [cutting, setCutting] = useState(false);
     const isOnline = status.includes('idle') || status.includes('printing');
 
     const handleEnablePrinter = async () => {
@@ -26,6 +27,17 @@ export const PrinterStatusCard = ({ status, isPaused, onStatusUpdate }: PrinterS
         }
     };
 
+    const handleForceCut = async () => {
+        setCutting(true);
+        try {
+            await actions.forceCut({});
+        } catch (error) {
+            console.error("Failed to cut paper", error);
+        } finally {
+            setTimeout(() => setCutting(false), 1000);
+        }
+    };
+
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">
@@ -33,20 +45,35 @@ export const PrinterStatusCard = ({ status, isPaused, onStatusUpdate }: PrinterS
                     <Printer className="w-6 h-6 text-indigo-600" />
                     Printer Status
                 </h2>
-                {isPaused && (
-                     <button
-                        onClick={handleEnablePrinter}
-                        disabled={enabling}
+                <div className="flex gap-2">
+                    {isPaused && (
+                        <button
+                            onClick={handleEnablePrinter}
+                            disabled={enabling}
+                            className={`flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full transition-colors ${
+                                enabling 
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                            }`}
+                        >
+                            <RefreshCcw className={`w-4 h-4 ${enabling ? 'animate-spin' : ''}`} />
+                            {enabling ? 'Enabling...' : 'Enable'}
+                        </button>
+                    )}
+                    <button
+                        onClick={handleForceCut}
+                        disabled={cutting}
                         className={`flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full transition-colors ${
-                            enabling 
+                            cutting 
                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                            : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                            : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
                         }`}
+                        title="Force Cut"
                     >
-                        <RefreshCcw className={`w-4 h-4 ${enabling ? 'animate-spin' : ''}`} />
-                        {enabling ? 'Enabling...' : 'Enable Printer'}
+                        <Scissors className="w-4 h-4" />
+                        {cutting ? 'Cutting...' : 'Cut'}
                     </button>
-                )}
+                </div>
             </div>
             
             <div className={`flex items-center gap-3 p-4 rounded-xl ${isOnline ? 'bg-green-50 border border-green-100' : 'bg-amber-50 border border-amber-100'}`}>

@@ -14,9 +14,9 @@
 - [x] Refactor `TextPrinter.tsx` <!-- id: 26 -->
 - [x] Update `src/pages/index.astro` <!-- id: 27 -->
 - [x] Verify build and functionality <!-- id: 28 -->
-- [ ] Implement Force Cut Feature <!-- id: 30 -->
-    - [ ] Add `forceCut` action to `src/actions/index.ts`
-    - [ ] Update `PrinterStatusCard.tsx` with cut button
-- [ ] Implement Chunked Printing <!-- id: 31 -->
-    - [ ] Refactor `printImage` in `src/actions/index.ts` to support locking and chunking
-    - [ ] Verify chunked printing
+- [x] Implement Force Cut Feature <!-- id: 30 -->
+    - [x] Add `forceCut` action to `src/actions/index.ts`
+    - [x] Update `PrinterStatusCard.tsx` with cut button
+- [x] Implement Chunked Printing <!-- id: 31 -->
+    - [x] Refactor `printImage` in `src/actions/index.ts` to support locking and chunking
+    - [x] Verify chunked printing
