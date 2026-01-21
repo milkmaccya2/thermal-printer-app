@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { actions } from 'astro:actions';
 import { Type, Printer, Loader2 } from 'lucide-react';
+import { Card } from './ui/Card';
 
 export const TextPrinter = () => {
     const [text, setText] = useState('');
@@ -27,7 +28,7 @@ export const TextPrinter = () => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+        <Card>
             <h2 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
                 <Type className="w-6 h-6 text-indigo-600" />
                 Text Printer
@@ -78,6 +79,6 @@ export const TextPrinter = () => {
                     )}
                 </button>
             </div>
-        </div>
+        </Card>
     );
 };

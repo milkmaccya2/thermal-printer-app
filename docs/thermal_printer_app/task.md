@@ -1,10 +1,22 @@
 # Task Checklist
 
-- [x] Install `lucide-react` <!-- id: 7 -->
-- [x] Refactor `PrinterManager.tsx` with icons <!-- id: 8 -->
-- [x] Refactor `ImagePrinter.tsx` with icons <!-- id: 9 -->
-- [x] Refactor `TextPrinter.tsx` with icons <!-- id: 10 -->
-- [x] Verify UI consistency <!-- id: 11 -->
-- [ ] Implement PWA Manifest & Service Worker <!-- id: 16 -->
-- [ ] Implement Web Share Target Handler <!-- id: 17 -->
-- [ ] Configure `index.astro` for PWA <!-- id: 18 -->
+- [x] Create `src/components/types.ts` <!-- id: 20 -->
+- [x] Create `src/components/ui/Card.tsx` <!-- id: 21 -->
+- [x] Create `src/layouts/Layout.astro` <!-- id: 22 -->
+- [x] Create `src/components/Header.astro` <!-- id: 23 -->
+- [x] Refactor `PrinterManager.tsx` <!-- id: 24 -->
+    - [x] Create `PrinterStatusCard.tsx`
+    - [x] Create `PrintQueueCard.tsx`
+    - [x] Update `PrinterManager.tsx`
+- [x] Refactor `ImagePrinter.tsx` <!-- id: 25 -->
+    - [x] Create `ImageUploader.tsx`
+    - [x] Update `ImagePrinter.tsx`
+- [x] Refactor `TextPrinter.tsx` <!-- id: 26 -->
+- [x] Update `src/pages/index.astro` <!-- id: 27 -->
+- [x] Verify build and functionality <!-- id: 28 -->
+- [ ] Implement Force Cut Feature <!-- id: 30 -->
+    - [ ] Add `forceCut` action to `src/actions/index.ts`
+    - [ ] Update `PrinterStatusCard.tsx` with cut button
+- [ ] Implement Chunked Printing <!-- id: 31 -->
+    - [ ] Refactor `printImage` in `src/actions/index.ts` to support locking and chunking
+    - [ ] Verify chunked printing
