@@ -25,10 +25,10 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 
 ```mermaid
 graph TD
-    User["<img src='https://api.iconify.design/fluent-emoji:person-using-laptop.svg?height=40' /><br/>User (Browser)<br/>Mobile / PC"]
+    User["<img src='https://api.iconify.design/fluent-emoji:man-technologist.svg?height=40' /><br/>User (Browser)<br/>Mobile / PC"]
     
     subgraph "Raspberry Pi"
-        Server["<img src='https://api.iconify.design/fluent-emoji:server.svg?height=40' /><br/>Node.js Server<br/>(Astro + React)"]
+        Server["<img src='https://api.iconify.design/fluent-emoji:desktop-computer.svg?height=40' /><br/>Node.js Server<br/>(Astro + React)"]
         CUPS["<img src='https://api.iconify.design/fluent-emoji:gear.svg?height=40' /><br/>CUPS / lp Command"]
         Queue["<img src='https://api.iconify.design/fluent-emoji:inbox-tray.svg?height=40' /><br/>Print Queue"]
     end

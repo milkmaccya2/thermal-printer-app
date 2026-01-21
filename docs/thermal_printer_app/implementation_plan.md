@@ -1,32 +1,46 @@
-# 実装計画: アイコンセットの導入 (Lucide React)
+# 実装計画 - Web Share Target PWA
 
-## 概要
-アプリケーション内の絵文字（🤖, 🖼️, 📝, ✅, ❌ など）を、モダンで統一感のあるアイコンセット `lucide-react` に置き換えます。これにより、「AI生成っぽさ」を払拭し、より洗練されたUIを目指します。
+## 目標
+**Web Share Target API** をサポートし、アプリケーションをPWA化することで、スマートフォンの「共有」メニューから直接印刷できるようにする。
 
-## 変更内容
+## ユーザーレビュー必須事項
+> [!IMPORTANT]
+> **iOSの制限**: Web Share Target API（PWAへのファイル共有）は、iOS/Safariでのサポートが限定的です。Android/Chromeでは確実に動作します。iOSの場合、ユーザーは引き続き標準の「アップロード」ボタンを使用するか、iOSショートカットを使用した回避策が必要になる可能性があります。
 
-### 1. 依存関係の追加
-- `lucide-react` をインストールします。
+## 変更案
 
-### 2. コンポーネントの修正
-以下のコンポーネント内の絵文字を対応する Lucide アイコンに置換します。
+### 1. PWAマニフェスト (`public/manifest.json`)
+アプリをインストール可能（ホーム画面に追加）にするためのマニフェストファイルを作成する。
+- **名前**: Thermal Printer
+- **表示**: Standalone
+- **共有ターゲット**: `/share-target` エンドポイントを登録し、`POST` (multipart/form-data) 経由で `image/*` を受け入れる。
 
-#### `src/components/PrinterManager.tsx`
-- **Printer Status**: `Printer` (Printer icon), `CheckCircle` (Online), `AlertCircle` (Error/Offline)
-- **Queue**: `List` (Queue header), `FileText` (Job item)
-- **Enable Button**: `Play` or `RefreshCcw` (Enable)
+### 2. Service Worker (`public/sw.js` & 登録)
+最小限のService Workerを追加する。
+- PWAインストール基準（fetchハンドラ）を満たすために必要。
+- 現時点では単純なパススルーでよい。
 
-#### `src/components/ImagePrinter.tsx`
-- **Header**: `Image` (Image Printer header)
-- **Placeholder**: `Upload` or `FolderOpen` (Upload area)
-- **Status**: `Check` (Success), `XCircle` (Error)
-- **Button**: `Printer` (Print button)
+### 3. 共有ターゲットハンドラ (`src/pages/share-target.astro`)
+共有シートからのPOSTリクエストを処理するための新しいページ（またはAPIルート）を作成する。
+- **アクション**: カスタマイズされた `multipart/form-data` を受け入れる。
+- **ロジック**:
+    - ファイルを抽出する。
+    - （オプション）画像がプリロードされた状態でメインページにリダイレクトする、または
+    - 即座に処理して印刷する（強引すぎる可能性がある）。
+    - **提案**: アップロードされたファイルが事前に入力された `ImagePrinter` コンポーネントをレンダリングする、純粋なPOSTハンドラページを使用する。
 
-#### `src/components/TextPrinter.tsx`
-- **Header**: `Type` or `FileType2` (Text Printer header)
-- **Status**: `Check` (Success), `XCircle` (Error)
-- **Button**: `Printer` (Print button)
+### 4. Astro設定 / レイアウト
+`src/pages/index.astro`（またはグローバルレイアウト）を更新し、`manifest.json` をリンクして `sw.js` を登録する。
 
-## 検証
-- モバイル・デスクトップでの表示確認。
-- アイコンのサイズや色が既存の Tailwind CSS スタイルと調和しているか確認。
+## 検証計画
+### 自動テスト
+- PWA固有のものはなし。
+
+### 手動検証
+1. **Android**:
+    - Chromeでアプリを開く -> "アプリをインストール"。
+    - 写真へ移動 -> 共有 -> "Thermal Printer"を選択。
+    - アプリが開き、画像の印刷準備ができていることを確認する。
+2. **iOS**:
+    - Safariで開く -> "ホーム画面に追加"。
+    - 画像を共有してみる（OSバージョンでサポートされている場合）、またはアプリがスタンドアロンとして開くことを確認する。
