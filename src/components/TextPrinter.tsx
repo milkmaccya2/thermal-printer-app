@@ -3,6 +3,10 @@ import { actions } from 'astro:actions';
 import { Type, Printer, Loader2 } from 'lucide-react';
 import { Card } from './ui/Card';
 
+/**
+ * Component for printing raw text to the thermal printer.
+ * Handles text input, status display, and invoking the printText action.
+ */
 export const TextPrinter = () => {
     const [text, setText] = useState('');
     const [status, setStatus] = useState('');

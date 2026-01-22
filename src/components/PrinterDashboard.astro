@@ -1,0 +1,14 @@
+---
+import { PrinterManager } from './PrinterManager'
+import { getPrinterStatusFromOS } from '../utils/printerStatus'
+
+// This runs on the server (Server Island)
+// It performs the heavy lifting of fetching status from the OS
+const { status, jobs, isPaused } = await getPrinterStatusFromOS()
+---
+
+<!-- 
+  The PrinterManager is hydrated on the client (client:load) 
+  but receives its INITIAL data from the server-side fetch above.
+-->
+<PrinterManager client:load initialData={{ status, jobs, isPaused }} />

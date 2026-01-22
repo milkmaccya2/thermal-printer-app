@@ -3,14 +3,27 @@ import Layout from '../layouts/Layout.astro'
 import Header from '../components/Header.astro'
 import { TextPrinter } from '../components/TextPrinter'
 import { ImagePrinter } from '../components/ImagePrinter'
-import { PrinterManager } from '../components/PrinterManager'
+import PrinterDashboard from '../components/PrinterDashboard.astro'
 ---
 
 <Layout title="Thermal Printer POS-80 App">
 	<div class="max-w-[1200px] mx-auto p-4 sm:p-6 lg:p-8">
 		<Header />
 
-		<PrinterManager client:load />
+		<PrinterDashboard server:defer>
+			<div
+				slot="fallback"
+				class="p-4 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center min-h-[140px]"
+			>
+				<div class="flex flex-col items-center gap-2 text-gray-500">
+					<div
+						class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"
+					>
+					</div>
+					<span class="text-sm">Loading Printer Status...</span>
+				</div>
+			</div>
+		</PrinterDashboard>
 
 		<main class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
 			<TextPrinter client:load />

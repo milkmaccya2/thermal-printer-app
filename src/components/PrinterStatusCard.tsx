@@ -4,11 +4,18 @@ import { Printer, CheckCircle, AlertCircle, RefreshCcw, Scissors } from 'lucide-
 import { Card } from './ui/Card';
 
 interface PrinterStatusCardProps {
+    /** Combined status string from lpstat */
     status: string;
+    /** Simple heuristic if the printer is effectively paused */
     isPaused: boolean;
+    /** Callback to trigger a data refresh */
     onStatusUpdate: () => void;
 }
 
+/**
+ * Displays the current online/offline status of the printer.
+ * Provides controls to manually enable the printer or force a cut.
+ */
 export const PrinterStatusCard = ({ status, isPaused, onStatusUpdate }: PrinterStatusCardProps) => {
     const [enabling, setEnabling] = useState(false);
     const [cutting, setCutting] = useState(false);

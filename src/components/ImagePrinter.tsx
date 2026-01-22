@@ -4,6 +4,10 @@ import { Image, Printer, Loader2 } from 'lucide-react';
 import { Card } from './ui/Card';
 import { ImageUploader } from './ImageUploader';
 
+/**
+ * Component for printing images to the thermal printer.
+ * Handles image upload, client-side dithering preview, and invoking the printImage action.
+ */
 export const ImagePrinter = () => {
     const [original, setOriginal] = useState<string | null>(null);
     const [preview, setPreview] = useState<string | null>(null);

@@ -2,12 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { actions } from 'astro:actions';
 import { PrinterStatusCard } from './PrinterStatusCard';
 import { PrintQueueCard } from './PrintQueueCard';
-import type { PrintJob } from './types';
+import type { PrintJob } from '../utils/printerStatus';
 
-export const PrinterManager = () => {
-    const [jobs, setJobs] = useState<PrintJob[]>([]);
-    const [status, setStatus] = useState<string>('Checking...');
-    const [isPaused, setIsPaused] = useState<boolean>(false);
+interface PrinterManagerProps {
+    /**
+     * Initial status data fetched from the server.
+     * If provided, the component skips the initial client-side fetch and renders immediately.
+     */
+    initialData?: {
+        status: string;
+        jobs: PrintJob[];
+        isPaused: boolean;
+    };
+}
+
+/**
+ * Manages the printer status display and queue polling.
+ * Can be hydrated with initial data from a Server Island for instant loading.
+ */
+export const PrinterManager = ({ initialData }: PrinterManagerProps) => {
+    const [jobs, setJobs] = useState<PrintJob[]>(initialData?.jobs || []);
+    const [status, setStatus] = useState<string>(initialData?.status || 'Checking...');
+    const [isPaused, setIsPaused] = useState<boolean>(initialData?.isPaused || false);
 
     const fetchStatus = async () => {
         try {
@@ -26,7 +42,11 @@ export const PrinterManager = () => {
     };
 
     useEffect(() => {
-        fetchStatus();
+        // If we didn't get initial data, fetch immediately
+        if (!initialData) {
+            fetchStatus();
+        }
+        
         const interval = setInterval(fetchStatus, 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
     }, []);

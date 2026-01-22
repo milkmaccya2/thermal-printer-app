@@ -4,11 +4,18 @@ import { Card } from './ui/Card';
 import type { PrintJob } from './types';
 
 interface PrintQueueCardProps {
+    /** List of active print jobs */
     jobs: PrintJob[];
+    /** Callback to cancel all jobs */
     onClearQueue: () => void;
+    /** Callback to cancel a specific job */
     onCancelJob: (jobId: string) => void;
 }
 
+/**
+ * Visualizes the current print queue.
+ * Allows cancelling individual or all jobs.
+ */
 export const PrintQueueCard = ({ jobs, onClearQueue, onCancelJob }: PrintQueueCardProps) => {
     return (
         <Card>

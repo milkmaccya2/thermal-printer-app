@@ -2,13 +2,22 @@ import React, { useRef, useState } from 'react';
 import { Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 
 interface ImageUploaderProps {
+    /** Async handler when a file is selected */
     onImageSelect: (file: File) => Promise<void>;
+    /** Clear the current selection */
     onClear: () => void;
+    /** Original image data URL */
     original: string | null;
+    /** Processed/Dithered image data URL for preview */
     preview: string | null;
+    /** Loading state during image processing */
     processing: boolean;
 }
 
+/**
+ * Handles file selection and preview display for image printing.
+ * Toggles between Original and Dithered preview modes.
+ */
 export const ImageUploader = ({ onImageSelect, onClear, original, preview, processing }: ImageUploaderProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [viewMode, setViewMode] = useState<'original' | 'preview'>('preview');
