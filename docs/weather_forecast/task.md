@@ -16,5 +16,10 @@
 - [x] 印刷用キャプチャスクリプト <!-- id: 10 -->
     - [x] `scripts/print_briefing.ts` 作成
     - [x] ローカルの `/briefing` ページをキャプチャして印刷する機能の検証
-- [x] 自動化設定 <!-- id: 7 -->
-    - [x] `cron` 設定手順のドキュメント化 (`docs/thermal_printer_app/cron_setup.md`)
+- [ ] 自動化設定の分離・改善 <!-- id: 11 -->
+    - [ ] `README.md` の構成図更新（分離モデルへ）
+    - [ ] ラッパースクリプトの分割
+        - [ ] `scripts/cron_fetch_weather.sh`
+        - [ ] `scripts/cron_print_briefing.sh`
+        - [ ] `scripts/run_daily_briefing.sh` の削除
+    - [ ] `docs/thermal_printer_app/cron_setup.md` の更新

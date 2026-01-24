@@ -1,8 +1,7 @@
 
 ## 5. モーニング・ブリーフィングの自動化設定 (Cron)
 
-毎朝7:00に自動的に天気とカレンダーを印刷するための設定です。
-実行を簡単にするために、専用のラッパースクリプト `scripts/run_daily_briefing.sh` を用意しました。
+システムの安定性を高めるため、**「データの取得（天気）」** と **「印刷」** を別々のジョブとして設定します。これにより、印刷時にデータ取得待ちが発生せず、スムーズに動作します。
 
 ### 5-0. Puppeteer (Chrome) のセットアップ
 
@@ -22,17 +21,25 @@ Raspberry Pi上で以下のコマンドを実行し、エラーが出ないこ�
 ```bash
 # プロジェクトディレクトリに移動
 cd ~/git/thermal-printer-app
+git pull
 
-# 権限の付与
-chmod +x scripts/run_daily_briefing.sh
+# 1. 天気画像の取得テスト
+./scripts/cron_fetch_weather.sh
+# -> public/images/weather-today.png が更新されます
 
-# 手動実行
-./scripts/run_daily_briefing.sh
+# 2. 印刷テスト (サーバーが起動している必要があります)
+./scripts/cron_print_briefing.sh
+# -> プリンタから出力されます
 ```
 
 ### 5-2. Cronジョブの登録
 
-毎朝 7:00 に実行する設定です。
+以下の2つのジョブを登録します。
+
+1. **Weather Fetcher**: 毎時実行（常に最新の予報画像をキャッシュ）
+2. **Morning Printer**: 朝 7:00 に実行（キャッシュされた画像と最新のカレンダーで印刷）
+
+**設定手順:**
 
 1. **crontab の編集**
    ```bash
@@ -43,14 +50,12 @@ chmod +x scripts/run_daily_briefing.sh
    ファイルの末尾に以下を追加します。（パスは環境に合わせて変更してください）
    
    ```cron
-   # Morning Briefing: Run daily briefing script at 7:00 AM
-   0 7 * * * /home/milkmaccya/git/thermal-printer-app/scripts/run_daily_briefing.sh >> /home/milkmaccya/git/thermal-printer-app/cron.log 2>&1
-   ```
+   # Job 1: Fetch Weather Image (Every hour at minute 50)
+   50 * * * * /home/milkmaccya/git/thermal-printer-app/scripts/cron_fetch_weather.sh >> /home/milkmaccya/git/thermal-printer-app/cron_weather.log 2>&1
 
-   **メリット:**
-   - 複雑なパス指定が不要になります。
-   - スクリプト内で `NVM` の読み込みやディレクトリ移動を自動で行います。
-   - `cron.log` に詳細な実行ログが残ります。
+   # Job 2: Print Morning Briefing (Daily at 7:00 AM)
+   0 7 * * * /home/milkmaccya/git/thermal-printer-app/scripts/cron_print_briefing.sh >> /home/milkmaccya/git/thermal-printer-app/cron_print.log 2>&1
+   ```
 
 ### 5-3. タイムゾーンの確認
 
