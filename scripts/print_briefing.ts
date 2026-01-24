@@ -28,16 +28,25 @@ async function main() {
 
   if (process.platform === 'linux') {
       try {
-          const paths = ['/usr/bin/chromium-browser', '/usr/bin/chromium'];
-          for (const p of paths) {
-              const fs = await import('node:fs/promises');
-              try {
-                  await fs.access(p);
-                  launchOptions.executablePath = p;
-                  console.log(`Using system browser at ${p}`);
-                  break;
-              } catch {}
-          }
+        const { execSync } = await import('node:child_process');
+        try {
+            const path = execSync('which chromium || which chromium-browser').toString().trim();
+            if (path) {
+                launchOptions.executablePath = path;
+                console.log(`Using system browser at ${path}`);
+            }
+        } catch (e) {
+            const paths = ['/usr/bin/chromium-browser', '/usr/bin/chromium', '/usr/bin/google-chrome-stable'];
+            for (const p of paths) {
+                const fs = await import('node:fs/promises');
+                try {
+                    await fs.access(p);
+                    launchOptions.executablePath = p;
+                    console.log(`Using system browser at ${p}`);
+                    break;
+                } catch {}
+            }
+        }
       } catch (e) {}
   }
 
