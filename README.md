@@ -33,8 +33,12 @@ graph TD
     Google["<img src='https://api.iconify.design/logos:google-calendar.svg?height=40' /><br/>Google Calendar"]
 
     subgraph "Raspberry Pi"
-        Cron["<img src='https://api.iconify.design/fluent-emoji:alarm-clock.svg?height=40' /><br/>Cron (Automation)"]
-        Scripts["<img src='https://api.iconify.design/fluent-emoji:scroll.svg?height=40' /><br/>Scripts<br/>(Puppeteer / Node)"]
+        subgraph "Automation (Cron)"
+            JobFetch["⏰ 6:50 AM<br/>Weather Fetcher"]
+            JobPrint["⏰ 7:00 AM<br/>Briefing Printer"]
+        end
+        
+        Disk["<img src='https://api.iconify.design/fluent-emoji:floppy-disk.svg?height=40' /><br/>Storage<br/>(public/images)"]
         Server["<img src='https://api.iconify.design/fluent-emoji:desktop-computer.svg?height=40' /><br/>Node.js Server<br/>(Astro + React)"]
         CUPS["<img src='https://api.iconify.design/fluent-emoji:gear.svg?height=40' /><br/>CUPS / lp Command"]
         Queue["<img src='https://api.iconify.design/fluent-emoji:inbox-tray.svg?height=40' /><br/>Print Queue"]
@@ -44,15 +48,16 @@ graph TD
 
     User --"HTTP/WiFi<br/>Actions (JSON)"--> Server
     
-    Cron --"Trigger (7:00 AM)"--> Scripts
+    %% Job 1: Fetch Weather
+    JobFetch --"1. Scrape"--> Yahoo
+    JobFetch --"2. Save Image"--> Disk
     
-    Scripts --"1. Scrape"--> Yahoo
-    Scripts --"2. Save Image"--> Server
-    Scripts --"3. Capture Dashboard"--> Server
-    
+    %% Job 2: Print Briefing
+    JobPrint --"3. Capture<br/>Dashboard"--> Server
+    Server --"Read Image"--> Disk
     Server --"Fetch Events"--> Google
     
-    Scripts --"4. Print Command"--> CUPS
+    JobPrint --"4. Print Command"--> CUPS
     Server --"Execute"--> CUPS
     
     CUPS --> Queue
