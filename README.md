@@ -54,30 +54,34 @@ Two independent Cron jobs handle data fetching and daily printing.
 graph TD
     Yahoo["<img src='https://api.iconify.design/fluent-emoji:sun-behind-rain-cloud.svg?height=40' /><br/>Yahoo! Weather"]
     Google["<img src='https://api.iconify.design/logos:google-calendar.svg?height=40' /><br/>Google Calendar"]
-
-    subgraph "Raspberry Pi"
-        subgraph "Cron Jobs"
-            JobFetch["⏰ 6:50 AM<br/>Weather Fetcher"]
-            JobPrint["⏰ 7:00 AM<br/>Briefing Printer"]
-        end
-        
-        Disk["<img src='https://api.iconify.design/fluent-emoji:floppy-disk.svg?height=40' /><br/>Storage<br/>(public/images)"]
-        Server["<img src='https://api.iconify.design/fluent-emoji:desktop-computer.svg?height=40' /><br/>Node.js Server<br/>(Astro Dashboard)"]
-        CUPS["<img src='https://api.iconify.design/fluent-emoji:gear.svg?height=40' /><br/>CUPS"]
-    end
-    
+    Disk["<img src='https://api.iconify.design/fluent-emoji:floppy-disk.svg?height=40' /><br/>Storage<br/>(public/images)"]
     Printer["<img src='https://api.iconify.design/fluent-emoji:printer.svg?height=40' /><br/>Thermal Printer"]
 
-    %% Job 1: Fetch Weather
-    JobFetch --"1. Scrape"--> Yahoo
-    JobFetch --"2. Save Image"--> Disk
-    
-    %% Job 2: Print Briefing
-    JobPrint --"3. Capture<br/>Dashboard"--> Server
+    subgraph "Raspberry Pi"
+        
+        subgraph "Job 1: Weather Fetcher (6:50 AM)"
+            direction TB
+            Script1["Script: fetch_weather_image"]
+        end
+
+        subgraph "Job 2: Briefing Printer (7:00 AM)"
+            direction TB
+            Script2["Script: print_briefing"]
+            Server["Node.js Server<br/>(Astro Dashboard)"]
+            CUPS["CUPS System"]
+        end
+    end
+
+    %% Flow for Job 1
+    Script1 --"1. Scrape"--> Yahoo
+    Script1 --"2. Save Image"--> Disk
+
+    %% Flow for Job 2
+    Script2 --"3. Capture"--> Server
     Server --"Read Image"--> Disk
     Server --"Fetch Events"--> Google
     
-    JobPrint --"4. Print Command"--> CUPS
+    Script2 --"4. Print Command"--> CUPS
     CUPS --> Printer
 ```
  
