@@ -50,8 +50,8 @@ git pull
    ファイルの末尾に以下を追加します。（パスは環境に合わせて変更してください）
    
    ```cron
-   # Job 1: Fetch Weather Image (Every hour at minute 50)
-   50 * * * * /home/milkmaccya/git/thermal-printer-app/scripts/cron_fetch_weather.sh >> /home/milkmaccya/git/thermal-printer-app/cron_weather.log 2>&1
+   # Job 1: Fetch Weather Image (Daily at 6:50 AM)
+   50 6 * * * /home/milkmaccya/git/thermal-printer-app/scripts/cron_fetch_weather.sh >> /home/milkmaccya/git/thermal-printer-app/cron_weather.log 2>&1
 
    # Job 2: Print Morning Briefing (Daily at 7:00 AM)
    0 7 * * * /home/milkmaccya/git/thermal-printer-app/scripts/cron_print_briefing.sh >> /home/milkmaccya/git/thermal-printer-app/cron_print.log 2>&1
