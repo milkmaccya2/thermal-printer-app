@@ -4,6 +4,20 @@
 毎朝自動的に天気とカレンダーを印刷するための設定です。
 この機能は `scripts/fetch_weather_image.ts` (画像取得) と `scripts/print_briefing.ts` (印刷) の2つのスクリプトを順次実行することで動作します。
 
+
+### 5-0. Puppeteer (Chrome) のセットアップ
+
+Raspberry Pi (ARM64) では、Puppeteerが自動ダウンロードするChrome (x64) は動作しません。
+代わりにシステムのChromiumブラウザをインストールして使用します。
+
+```bash
+# Raspberry Pi上で実行
+sudo apt update
+sudo apt install -y chromium-browser chromium-codecs-ffmpeg
+```
+
+※ スクリプトは自動的に `/usr/bin/chromium-browser` を検出して使用するように設定されています。
+
 ### 5-1. 動作確認
 
 Raspberry Pi上で以下のコマンドを実行し、エラーが出ないことを確認してください。

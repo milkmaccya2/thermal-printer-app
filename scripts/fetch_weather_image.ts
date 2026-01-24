@@ -21,10 +21,30 @@ async function main() {
   
   // 1. Launch Browser
   console.log('launching browser...');
-  const browser = await puppeteer.launch({
+  
+  const launchOptions: any = {
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'] // Helper for Linux/Pi environments
-  });
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  };
+
+  // On Raspberry Pi (Linux ARM), use system Chromium instead of bundled Chrome (x64)
+  if (process.platform === 'linux') {
+      try {
+          // Check common paths for Chromium on Pi
+          const paths = ['/usr/bin/chromium-browser', '/usr/bin/chromium'];
+          for (const p of paths) {
+              const fs = await import('node:fs/promises');
+              try {
+                  await fs.access(p);
+                  launchOptions.executablePath = p;
+                  console.log(`Using system browser at ${p}`);
+                  break;
+              } catch {}
+          }
+      } catch (e) { console.error('Error checking for system browser:', e); }
+  }
+
+  const browser = await puppeteer.launch(launchOptions);
   const page = await browser.newPage();
   
   // Set viewport to roughly desktop/tablet width to get the horizontal layout if possible, 

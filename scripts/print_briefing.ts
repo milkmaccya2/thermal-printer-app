@@ -20,10 +20,28 @@ async function main() {
   
   // 1. Launch Browser
   console.log('launching browser...');
-  const browser = await puppeteer.launch({
+  
+  const launchOptions: any = {
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  };
+
+  if (process.platform === 'linux') {
+      try {
+          const paths = ['/usr/bin/chromium-browser', '/usr/bin/chromium'];
+          for (const p of paths) {
+              const fs = await import('node:fs/promises');
+              try {
+                  await fs.access(p);
+                  launchOptions.executablePath = p;
+                  console.log(`Using system browser at ${p}`);
+                  break;
+              } catch {}
+          }
+      } catch (e) {}
+  }
+
+  const browser = await puppeteer.launch(launchOptions);
   const page = await browser.newPage();
   
   // Set viewport width to match printer safely
