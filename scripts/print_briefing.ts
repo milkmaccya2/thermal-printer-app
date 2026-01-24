@@ -30,13 +30,13 @@ async function main() {
       try {
         const { execSync } = await import('node:child_process');
         try {
-            const path = execSync('which chromium || which chromium-browser').toString().trim();
+            const path = execSync('which chromium || which chromium-browser || which google-chrome-stable').toString().trim();
             if (path) {
                 launchOptions.executablePath = path;
                 console.log(`Using system browser at ${path}`);
             }
         } catch (e) {
-            const paths = ['/usr/bin/chromium-browser', '/usr/bin/chromium', '/usr/bin/google-chrome-stable'];
+            const paths = ['/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome-stable'];
             for (const p of paths) {
                 const fs = await import('node:fs/promises');
                 try {
@@ -46,6 +46,13 @@ async function main() {
                     break;
                 } catch {}
             }
+        }
+
+        if (!launchOptions.executablePath) {
+             console.error('❌ CRITICAL: System Chromium not found!');
+             console.error('Please install it on your Raspberry Pi:');
+             console.error('sudo apt update && sudo apt install -y chromium');
+             process.exit(1);
         }
       } catch (e) {}
   }
