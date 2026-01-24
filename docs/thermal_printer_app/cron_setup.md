@@ -13,7 +13,7 @@ Raspberry Pi (ARM64) では、Puppeteerが自動ダウンロードするChrome (
 ```bash
 # Raspberry Pi上で実行
 sudo apt update
-sudo apt install -y chromium-browser chromium-codecs-ffmpeg
+sudo apt install -y chromium
 ```
 
 ※ スクリプトは自動的に `/usr/bin/chromium-browser` を検出して使用するように設定されています。
