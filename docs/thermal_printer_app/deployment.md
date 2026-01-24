@@ -167,3 +167,6 @@ echo "✅ Deployment complete!"
    ```bash
    pnpm exec pm2 save
    ```
+
+## 5. モーニング・ブリーフィング (自動印刷)
+自動印刷の設定手順については、[Cron設定ガイド](./cron_setup.md) を参照してください。

@@ -1,0 +1,20 @@
+# モーニング・ブリーフィング自動印刷タスク
+
+- [x] 天気予報印刷の実装 <!-- id: 0 -->
+    - [x] Yahoo天気ページの構造解析
+    - [x] 画像生成スクリプトの作成 (Puppeteer)
+    - [x] 印刷ロジックの実装
+- [x] 天気予報スクリプトの改修 <!-- id: 8 -->
+    - [x] 印刷部分を削除し、`public/weather-today.png` に保存するモードへ変更
+- [x] Astroダッシュボード作成 <!-- id: 9 -->
+    - [x] Google Calendar連携の実装
+        - [x] `src/utils/googleCalendar.ts` 作成
+        - [x] 認証用スクリプト `scripts/get_calendar_token.ts` 作成
+        - [x] 初回認証の実行
+    - [x] `src/pages/briefing.astro` を作成
+    - [x] 保存された天気画像とカレンダー予定を表示するUI実装
+- [x] 印刷用キャプチャスクリプト <!-- id: 10 -->
+    - [x] `scripts/print_briefing.ts` 作成
+    - [x] ローカルの `/briefing` ページをキャプチャして印刷する機能の検証
+- [x] 自動化設定 <!-- id: 7 -->
+    - [x] `cron` 設定手順のドキュメント化 (`docs/thermal_printer_app/cron_setup.md`)

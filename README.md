@@ -9,6 +9,7 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 
 - **Text Printing**: Send raw text directly to the printer.
 - **Image Printing**: Upload images which are automatically resized and dithered (Floyd-Steinberg) for optimal thermal printing.
+- **Morning Briefing**: Automatically prints a daily dashboard with the weather forecast (Yahoo! Weather) and your Google Calendar schedule.
 - **Queue Management**: Monitor the status of the print queue.
 - **Modern UI**: Clean interface built with Astro, React, and TailwindCSS.
 
@@ -18,6 +19,8 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 - ![React](https://api.iconify.design/logos:react.svg?height=16) **UI Library**: [React](https://react.dev/)
 - ![TailwindCSS](https://api.iconify.design/logos:tailwindcss-icon.svg?height=16) **Styling**: [TailwindCSS](https://tailwindcss.com/)
 - ![Sharp](https://api.iconify.design/fluent-emoji:framed-picture.svg?height=16) **Image Processing**: [Sharp](https://sharp.pixelplumbing.com/)
+- ![Puppeteer](https://api.iconify.design/logos:puppeteer.svg?height=16) **Automation**: [Puppeteer](https://pptr.dev/) (Headless Chrome)
+- ![Google](https://api.iconify.design/logos:google-icon.svg?height=16) **API Integration**: Google Calendar API
 - ![Backend](https://api.iconify.design/logos:nodejs-icon.svg?height=16) **Backend Interaction**: `actions` (Astro Actions) calling system `lp` commands.
 - ![PM2](https://api.iconify.design/simple-icons:pm2.svg?height=16) **Process Manager**: [PM2](https://pm2.keymetrics.io/) (for production process management)
 
@@ -26,8 +29,12 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 ```mermaid
 graph TD
     User["<img src='https://api.iconify.design/fluent-emoji:man-technologist.svg?height=40' /><br/>User (Browser)<br/>Mobile / PC"]
-    
+    Yahoo["<img src='https://api.iconify.design/fluent-emoji:sun-behind-rain-cloud.svg?height=40' /><br/>Yahoo! Weather"]
+    Google["<img src='https://api.iconify.design/logos:google-calendar.svg?height=40' /><br/>Google Calendar"]
+
     subgraph "Raspberry Pi"
+        Cron["<img src='https://api.iconify.design/fluent-emoji:alarm-clock.svg?height=40' /><br/>Cron (Automation)"]
+        Scripts["<img src='https://api.iconify.design/fluent-emoji:scroll.svg?height=40' /><br/>Scripts<br/>(Puppeteer / Node)"]
         Server["<img src='https://api.iconify.design/fluent-emoji:desktop-computer.svg?height=40' /><br/>Node.js Server<br/>(Astro + React)"]
         CUPS["<img src='https://api.iconify.design/fluent-emoji:gear.svg?height=40' /><br/>CUPS / lp Command"]
         Queue["<img src='https://api.iconify.design/fluent-emoji:inbox-tray.svg?height=40' /><br/>Print Queue"]
@@ -36,7 +43,18 @@ graph TD
     Printer["<img src='https://api.iconify.design/fluent-emoji:printer.svg?height=40' /><br/>Thermal Printer<br/>(POS-80)"]
 
     User --"HTTP/WiFi<br/>Actions (JSON)"--> Server
+    
+    Cron --"Trigger (7:00 AM)"--> Scripts
+    
+    Scripts --"1. Scrape"--> Yahoo
+    Scripts --"2. Save Image"--> Server
+    Scripts --"3. Capture Dashboard"--> Server
+    
+    Server --"Fetch Events"--> Google
+    
+    Scripts --"4. Print Command"--> CUPS
     Server --"Execute"--> CUPS
+    
     CUPS --> Queue
     Queue --"USB"--> Printer
 ```
@@ -62,7 +80,14 @@ graph TD
    pnpm install
    ```
 
-3. Start the development server:
+3. **Google Calendar Setup** (for Morning Briefing):
+   - Place your `credentials.json` (OAuth Client ID) in the project root.
+   - Run the auth script to generate `token.json`:
+     ```bash
+     npx tsx scripts/get_calendar_token.ts
+     ```
+
+4. Start the development server:
    ```bash
    pnpm dev
    ```

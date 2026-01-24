@@ -39,3 +39,7 @@ logs/
 
 # Local scripts
 deploy.sh
+
+# Google Credentials
+credentials.json
+token.json
