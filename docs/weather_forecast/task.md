@@ -17,6 +17,6 @@
     - [x] `scripts/print_briefing.ts` 作成
     - [x] ローカルの `/briefing` ページをキャプチャして印刷する機能の検証
 - [x] 自動化設定の分離・改善 <!-- id: 11 -->
-    - [x] `README.md` の構成図更新
+    - [x] `README.md` の構成図更新 (サブグラフ化で明確化)
     - [x] ラッパースクリプトの分割
-    - [x] `docs/thermal_printer_app/cron_setup.md` の更新 (毎日朝のみ実行へ変更)
+    - [x] `docs/thermal_printer_app/cron_setup.md` の更新

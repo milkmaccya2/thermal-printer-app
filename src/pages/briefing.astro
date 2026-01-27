@@ -14,7 +14,9 @@ const dateStr = now.toLocaleDateString('ja-JP', {
 
 // We assume the weather image is available publicly at this path
 // The user (via script) is responsible for updating this image before printing
-const weatherImagePath = '/images/weather-today.png'
+// Use our dynamic API route to serve the image
+// Appending a timestamp ensures clients (like Puppeteer) don't cache it
+const weatherImageSrc = `/api/weather-image?t=${Date.now()}`
 ---
 
 <Layout title="Morning Briefing">
@@ -47,7 +49,7 @@ const weatherImagePath = '/images/weather-today.png'
         </h2>
         <div class="border-2 border-black rounded-lg overflow-hidden p-2">
           <img
-            src={weatherImagePath}
+            src={weatherImageSrc}
             alt="Weather Forecast"
             class="w-full h-auto grayscale contrast-125"
             style="image-rendering: pixelated;"
@@ -58,7 +60,7 @@ const weatherImagePath = '/images/weather-today.png'
         </div>
       </section>
 
-      <!-- Schedule Section -->
+      <!-- Calendar Section -->
       <section>
         <h2
           class="text-xl font-bold mb-3 border-b-2 border-gray-300 pb-1 flex items-center gap-2"
@@ -69,66 +71,45 @@ const weatherImagePath = '/images/weather-today.png'
           Today's Events
         </h2>
 
-        <div class="space-y-3">
-          {
-            events.length === 0 ? (
-              <div class="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500">
-                <p class="font-medium">No events scheduled.</p>
-                <p class="text-sm">Enjoy your day!</p>
-              </div>
-            ) : (
-              events.map((event: any) => {
-                const start = event.start.dateTime
-                  ? new Date(event.start.dateTime).toLocaleTimeString('ja-JP', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
-                  : 'All Day'
-                // const end = event.end.dateTime ? new Date(event.end.dateTime).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '';
-
-                return (
-                  <div class="flex items-start gap-3 border-l-4 border-black pl-3 py-1">
-                    <div class="min-w-[60px] font-mono font-bold text-lg leading-none pt-0.5">
-                      {start}
-                    </div>
-                    <div class="flex-1">
-                      <h3 class="font-bold text-lg leading-tight mb-1">
-                        {event.summary || '(No Title)'}
-                      </h3>
-                      {event.location && (
-                        <p class="text-sm text-gray-600 flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {event.location}
-                        </p>
-                      )}
-                    </div>
+        {
+          events.length === 0 ? (
+            <div class="border-2 border-dashed border-gray-300 p-6 text-center">
+              <p class="text-gray-500 font-medium">No events scheduled today</p>
+            </div>
+          ) : (
+            <div class="space-y-4">
+              {events.map((event) => (
+                <div class="border-l-4 border-black pl-3 py-1">
+                  <div class="flex items-center gap-2 text-sm font-bold text-gray-600 mb-0.5">
+                    <Clock class="w-4 h-4" />
+                    {event.isAllDay ? (
+                      <span>All Day</span>
+                    ) : (
+                      <span>
+                        {event.startTime} - {event.endTime}
+                      </span>
+                    )}
                   </div>
-                )
-              })
-            )
-          }
-        </div>
+                  <h3 class="text-lg font-black leading-tight mb-1">
+                    {event.title}
+                  </h3>
+                  {event.location && (
+                    <div class="flex items-start gap-1.5 text-sm text-gray-600 mt-1">
+                      <MapPin class="w-4 h-4 mt-0.5 shrink-0" />
+                      <span class="leading-tight">{event.location}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )
+        }
       </section>
-    </main>
 
-    <!-- Footer -->
-    <footer class="mt-8 pt-4 border-t-4 border-black text-center">
-      <p class="text-sm font-bold uppercase tracking-widest">
-        Orbital Skylab System
-      </p>
-    </footer>
+      <!-- Footer Area (Good for random quotes or reminders later) -->
+      <footer class="pt-8 text-center text-xs text-gray-400 font-mono">
+        Orbit-Skylab // {new Date().toLocaleTimeString('ja-JP')}
+      </footer>
+    </main>
   </div>
 </Layout>
-
-<style>
-  /* Print optimizations */
-  @media print {
-    @page {
-      margin: 0;
-    }
-    body {
-      margin: 0;
-      padding: 0;
-    }
-  }
-</style>

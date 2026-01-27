@@ -13,6 +13,8 @@
     - [x] Update `ImagePrinter.tsx`
 - [x] Refactor `TextPrinter.tsx` <!-- id: 26 -->
 - [x] Update `src/pages/index.astro` <!-- id: 27 -->
+- [ ] Fix Briefing Image Stale Issue
+    - [x] Update `src/pages/briefing.astro` to embed image as base64
 - [x] Verify build and functionality <!-- id: 28 -->
 - [x] Implement Force Cut Feature <!-- id: 30 -->
     - [x] Add `forceCut` action to `src/actions/index.ts`
