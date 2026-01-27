@@ -7,8 +7,8 @@ import { Card } from './ui/Card';
  * Component for printing raw text to the thermal printer.
  * Handles text input, status display, and invoking the printText action.
  */
-export const TextPrinter = () => {
-    const [text, setText] = useState('');
+export const TextPrinter = ({ initialText = '' }: { initialText?: string }) => {
+    const [text, setText] = useState(initialText);
     const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
 

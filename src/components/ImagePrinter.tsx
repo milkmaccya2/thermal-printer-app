@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { actions } from 'astro:actions';
 import { Image, Printer, Loader2 } from 'lucide-react';
 import { Card } from './ui/Card';
@@ -8,12 +8,42 @@ import { ImageUploader } from './ImageUploader';
  * Component for printing images to the thermal printer.
  * Handles image upload, client-side dithering preview, and invoking the printImage action.
  */
-export const ImagePrinter = () => {
-    const [original, setOriginal] = useState<string | null>(null);
+export const ImagePrinter = ({ initialImage }: { initialImage?: string }) => {
+    const [original, setOriginal] = useState<string | null>(initialImage || null);
     const [preview, setPreview] = useState<string | null>(null);
     const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
     const [processing, setProcessing] = useState(false);
+
+    useEffect(() => {
+        if (initialImage) {
+            handleInitialImage(initialImage);
+        }
+    }, [initialImage]);
+
+    const handleInitialImage = async (base64Img: string) => {
+        setProcessing(true);
+        setStatus('Generating preview...');
+        try {
+            // Need to convert base64 to File object for the existing logic, or just reuse the logic?
+            // Existing logic uses file to get base64 (done) and then calls processImagePreview(file).
+            // processImagePreview expects a File or Blob.
+            // Let's convert base64 to Blob.
+            const res = await fetch(base64Img);
+            const blob = await res.blob();
+            const file = new File([blob], "shared-image.png", { type: blob.type });
+
+            const { processImagePreview } = await import('../utils/ditheringClient');
+            const ditheredDataUrl = await processImagePreview(file);
+            setPreview(ditheredDataUrl);
+            setStatus('Preview ready.');
+        } catch (err) {
+            console.error(err);
+            setStatus('Failed to generate preview from shared image');
+        } finally {
+            setProcessing(false);
+        }
+    };
 
     const handleImageSelect = async (file: File) => {
         setProcessing(true);
