@@ -78,8 +78,21 @@ export async function getTodaysEvents() {
       orderBy: 'startTime',
     });
     
-    const events = res.data.items;
-    return events || [];
+    const events = res.data.items || [];
+
+    return events.map((event: any) => {
+        const isAllDay = !!event.start.date;
+        const startTime = isAllDay ? null : new Date(event.start.dateTime).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+        const endTime = isAllDay ? null : new Date(event.end.dateTime).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+
+        return {
+            title: event.summary,
+            location: event.location,
+            isAllDay,
+            startTime,
+            endTime,
+        };
+    });
   } catch (error) {
     console.error('Failed to fetch calendar events:', error);
     return [];
