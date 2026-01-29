@@ -1,11 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro'
 import { getTodaysEvents } from '../utils/googleCalendar'
-import { Calendar, Clock, MapPin } from 'lucide-react'
+import { getMenuForDate } from '../data/menu-data'
+import { Calendar, Clock, MapPin, Utensils } from 'lucide-react'
 
 // Get events server-side
 const events = await getTodaysEvents()
 const now = new Date()
+const todaysMenu = getMenuForDate(now)
 const dateStr = now.toLocaleDateString('ja-JP', {
   month: 'long',
   day: 'numeric',
@@ -105,6 +107,38 @@ const weatherImageSrc = `/api/weather-image?t=${Date.now()}`
           )
         }
       </section>
+
+      <!-- Menu Section -->
+      {
+        todaysMenu && (
+          <section>
+            <h2 class="text-xl font-bold mb-3 border-b-2 border-gray-300 pb-1 flex items-center gap-2">
+              <span class="bg-black text-white px-2 py-0.5 text-sm rounded-sm">
+                MENU
+              </span>
+              Today's Lunch
+            </h2>
+            <div class="border-2 border-black rounded-lg p-3">
+              <div class="flex items-start gap-2 mb-2">
+                <Utensils class="w-5 h-5 mt-1 shrink-0" />
+                <div>
+                  <h3 class="font-black text-lg leading-tight">
+                    {todaysMenu.lunch}
+                  </h3>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm border-t border-gray-200 pt-2 mt-2">
+                <span class="font-bold text-gray-600">Snack:</span>
+                <span class="font-medium">{todaysMenu.snack}</span>
+
+                <span class="font-bold text-gray-600">Energy:</span>
+                <span class="font-medium">{todaysMenu.calories}</span>
+              </div>
+            </div>
+          </section>
+        )
+      }
 
       <!-- Footer Area (Good for random quotes or reminders later) -->
       <footer class="pt-8 text-center text-xs text-gray-400 font-mono">
