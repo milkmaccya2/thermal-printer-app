@@ -7,9 +7,20 @@ An Astro-based web web interface for controlling a POS-80 thermal printer connec
 
 ## ![Features](https://api.iconify.design/fluent-emoji:sparkles.svg?height=24) Features
 
+<img src="https://github.com/user-attachments/assets/49341562-488d-4d6f-82b3-17dd11717f33" width="30%" />
+
 - **Text Printing**: Send raw text directly to the printer.
+
+<img src="https://github.com/user-attachments/assets/025bcd55-9ff6-4281-8a1d-13ac87c5b47e" width="200px" />
+
 - **Image Printing**: Upload images which are automatically resized and dithered (Floyd-Steinberg) for optimal thermal printing.
+
+<img src="https://github.com/user-attachments/assets/8916dcb4-852a-4f02-b504-7c3ae32967c4" width="200px" />
+
 - **Morning Briefing**: Automatically prints a daily dashboard with the weather forecast (Yahoo! Weather) and your Google Calendar schedule.
+
+<img src="https://github.com/user-attachments/assets/bca95b11-7e97-487a-95b9-0d0519f46f5d"  width="200px" />
+
 - **Queue Management**: Monitor the status of the print queue.
 - **Modern UI**: Clean interface built with Astro, React, and TailwindCSS.
 
